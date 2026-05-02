@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Sip & Spill — A drinking game for the group chat</title>
+<meta name="description" content="A chill drinking game for groups of 8+. Questions, dares, and one phone." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0907;
+    --bg-elev: #16110d;
+    --bg-card: #1c1612;
+    --ink: #f4ead5;
+    --ink-dim: #a89b85;
+    --ink-faint: #6b5e4a;
+    --accent: #e85d3c;
+    --accent-warm: #f4a261;
+    --gold: #d4a23c;
+    --line: rgba(244, 234, 213, 0.08);
+    --line-strong: rgba(244, 234, 213, 0.18);
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-weight: 300;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay for that bar-paper texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.4) 100%);
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    text-align: center;
+    padding: 3rem 0 2.5rem;
+    border-bottom: 0.5px solid var(--line);
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  .hero-mark {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-mark span {
+    color: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .hero h1 .amp {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 300;
+    font-size: 0.85em;
+    margin: 0 0.05em;
+  }
+
+  .hero-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    max-width: 28ch;
+    margin: 1rem auto 0;
+    line-height: 1.5;
+  }
+
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 2rem;
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .hero-divider::before,
+  .hero-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  /* ============ COUNTERS ============ */
+  .counters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .counter {
+    background: var(--bg-elev);
+    border: 0.5px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+
+  .counter-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .counter-value {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  /* ============ CARD ============ */
+  .card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 2rem 1.75rem;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .card.flipping {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  /* Decorative corners on the card */
+  .card::before,
+  .card::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 0.5px solid var(--accent);
+    opacity: 0.5;
+  }
+
+  .card::before {
+    top: 8px;
+    left: 8px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .card::after {
+    bottom: 8px;
+    right: 8px;
+    border-left: none;
+    border-top: none;
+  }
+
+  .card-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .card-type.dare {
+    color: var(--gold);
+  }
+
+  .card-text {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .card-text em {
+    color: var(--accent-warm);
+    font-style: italic;
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--ink);
+    border: 0.5px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:hover {
+    border-color: var(--ink-dim);
+    color: var(--ink);
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary {
+    flex: 2;
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-warm);
+    border-color: var(--accent-warm);
+    color: var(--bg);
+  }
+
+  .btn-secondary {
+    flex: 1;
+  }
+
+  .mode-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .mode-row button {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 10px;
+  }
+
+  .mode-row button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ============ HOUSE RULES ============ */
+  .rules {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-elev);
+    border-left: 2px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .rules-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .rules ul {
+    list-style: none;
+  }
+
+  .rules li {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+    line-height: 1.7;
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .rules li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  /* ============ HOW TO PLAY ============ */
+  .how {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 0.5px solid var(--line);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1rem;
+  }
+
+  .how h2 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 2rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .how-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .how-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .how-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 2.5rem;
+  }
+
+  .how-text {
+    font-family: var(--serif);
+    font-size: 1rem;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    padding-top: 0.4rem;
+  }
+
+  .how-text strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 0.5px solid var(--line);
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    line-height: 2;
+  }
+
+  footer .accent {
+    color: var(--accent);
+  }
+
+  /* ============ ANIMATIONS ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero, .counters, .card, .btn-row, .mode-row, .rules, .how {
+    animation: fadeUp 0.6s ease backwards;
+  }
+
+  .hero { animation-delay: 0s; }
+  .counters { animation-delay: 0.15s; }
+  .card { animation-delay: 0.25s; }
+  .btn-row { animation-delay: 0.35s; }
+  .mode-row { animation-delay: 0.4s; }
+  .rules { animation-delay: 0.5s; }
+
+  /* Mobile tweaks */
+  @media (max-width: 480px) {
+    .container { padding: 1.5rem 1.25rem 3rem; }
+    .hero { padding: 2rem 0 2rem; }
+    .card { padding: 1.75rem 1.25rem; min-height: 200px; }
+    .card-text { font-size: 1.2rem; }
+    .how h2 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-mark">EST. <span>2026</span> · A GROUP RITUAL</div>
+    <h1>Sip <span class="amp">&</span> <em>Spill</em></h1>
+    <p class="hero-sub">A chill drinking game for whoever's still answering the group chat.</p>
+    <div class="hero-divider">8 or more · 1 phone · No driving</div>
+  </header>
+
+  <!-- COUNTERS -->
+  <div class="counters">
+    <div class="counter">
+      <div class="counter-label">Round</div>
+      <div class="counter-value" id="round-num">0</div>
+    </div>
+    <div class="counter">
+      <div class="counter-label">Sips taken</div>
+      <div class="counter-value" id="sip-num">0</div>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="card" id="card">
+    <div class="card-type" id="card-type">TAP TO BEGIN</div>
+    <div class="card-text" id="card-text">Pass the phone clockwise. Whoever taps the deck reads the card aloud — and it's <em>about them</em>. Skip a card, take a sip.</div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-row">
+    <button class="btn-primary" onclick="drawCard()">Draw card</button>
+    <button class="btn-secondary" onclick="addSip()">Took a sip</button>
+  </div>
+
+  <div class="mode-row">
+    <button id="mode-mix" class="active" onclick="setMode('mix')">Mix</button>
+    <button id="mode-q" onclick="setMode('q')">Questions</button>
+    <button id="mode-d" onclick="setMode('d')">Dares</button>
+  </div>
+
+  <!-- HOUSE RULES -->
+  <div class="rules">
+    <div class="rules-title">House rules</div>
+    <ul>
+      <li>Skip a card, 1 sip.</li>
+      <li>Refuse a dare, 2 sips.</li>
+      <li>Caught lying on a question, 3 sips.</li>
+      <li>Drink water between rounds.</li>
+      <li>No one drives. Look out for each other.</li>
+    </ul>
+  </div>
+
+  <!-- HOW TO PLAY -->
+  <section class="how">
+    <div class="section-label">How to play</div>
+    <h2>Three rules,<br/>one circle.</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-text"><strong>Sit in a circle.</strong> Pass the phone clockwise after each card. The person holding the phone is the one in the spotlight.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-text"><strong>Tap the deck.</strong> A question or a dare appears. Answer honestly, do the dare, or sip to skip — your call.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-text"><strong>Pass it on.</strong> Reset the room with a sip of water every five rounds. The night is long.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    Drink responsibly · <span class="accent">·</span> · Made for the group chat
+  </footer>
+
+</div>
+
+<script>
+  const questions = [
+    "Have you ever lied about your age to get into something?",
+    "Have you ever sent a text to the wrong person and immediately regretted it?",
+    "Who in this room would survive longest in a zombie apocalypse, and why?",
+    "Have you ever pretended to know a song just to fit in?",
+    "What's the most expensive thing you've ever broken?",
+    "Have you ever stalked someone on social media for over an hour?",
+    "What's a song you secretly love but would never admit to?",
+    "Have you ever fallen asleep somewhere embarrassing?",
+    "Who here would you trust with a secret? Pick one and explain why.",
+    "Have you ever ghosted someone? How long did it take them to notice?",
+    "What's the worst lie you've told a teacher or boss?",
+    "Have you ever gotten lost and been too proud to ask for directions?",
+    "What's the dumbest thing you've ever spent more than $50 on?",
+    "Have you ever pretended to be sick to get out of plans?",
+    "Have you ever cried during a movie you said was 'mid'?",
+    "What's a food everyone seems to love that you genuinely don't get?",
+    "Have you ever forgotten someone's name mid-conversation?",
+    "Who in this group would you call at 3am in a real emergency?",
+    "What's the longest you've gone without showering?",
+    "Have you ever rehearsed a casual text before sending it?",
+    "Have you ever had a crush on a friend's partner?",
+    "What's the most useless skill you have?",
+    "Have you ever lied on a job application?",
+    "What's the petty hill you'd die on?",
+    "What's a compliment you've never forgotten?",
+    "Have you ever Googled how to spell a word mid-conversation?",
+    "What's the weirdest thing you find genuinely attractive?",
+    "Have you ever fake-laughed at a joke you didn't get?",
+    "Who's the last person who made you laugh till you cried?",
+    "Have you ever pretended to be on the phone to avoid someone?"
+  ];
+
+  const dares = [
+    "Show the group the last 3 photos in your camera roll.",
+    "Read out the last text you sent — no edits, no excuses.",
+    "Do your best impression of someone in this room. Group has to guess who.",
+    "Speak only in questions until your next turn.",
+    "Let the person to your left post a one-word story to your social media.",
+    "Sing the chorus of the last song you played.",
+    "Show your most-used emoji and explain why.",
+    "Do a 30-second standup set about someone in this room.",
+    "Swap one item of clothing with the person across from you.",
+    "Call a contact you haven't spoken to in 6+ months and just say hi.",
+    "Let the group write the next sentence in your notes app.",
+    "Do your most embarrassing dance move for 10 seconds.",
+    "Read your most recent search history out loud — last 5 entries.",
+    "Speak in a fake accent until someone earns your turn back.",
+    "Show your screen time report. Highest app gets roasted.",
+    "Until your next turn, refer to yourself in third person.",
+    "Give a 20-second TED talk on a topic the group picks.",
+    "Let the group rename your phone wallpaper for the night.",
+    "Compliment everyone in this room — but make each one weirdly specific.",
+    "Do an interpretive dance of your day. No words allowed.",
+    "Whisper everything you say until the next card.",
+    "Let the group pick your next song to play out loud.",
+    "Do the worm. Or attempt it. Either way you commit.",
+    "Trade phones with someone for the next round.",
+    "Show the last meme you saved.",
+    "Tell a story using only the titles of songs in your library."
+  ];
+
+  let mode = 'mix';
+  let round = 0;
+  let sips = 0;
+  let qPool = [];
+  let dPool = [];
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  qPool = shuffle(questions);
+  dPool = shuffle(dares);
+
+  function drawCard() {
+    const card = document.getElementById('card');
+    card.classList.add('flipping');
+
+    setTimeout(() => {
+      let type, text, isDare;
+      if (mode === 'q' || (mode === 'mix' && Math.random() < 0.6)) {
+        if (qPool.length === 0) qPool = shuffle(questions);
+        text = qPool.pop();
+        type = 'QUESTION';
+        isDare = false;
+      } else {
+        if (dPool.length === 0) dPool = shuffle(dares);
+        text = dPool.pop();
+        type = 'DARE';
+        isDare = true;
+      }
+
+      const cardType = document.getElementById('card-type');
+      cardType.textContent = type;
+      cardType.className = 'card-type' + (isDare ? ' dare' : '');
+      document.getElementById('card-text').textContent = text;
+
+      round++;
+      document.getElementById('round-num').textContent = round;
+
+      card.classList.remove('flipping');
+    }, 200);
+  }
+
+  function addSip() {
+    sips++;
+    document.getElementById('sip-num').textContent = sips;
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('.mode-row button').forEach(b => b.classList.remove('active'));
+    document.getElementById('mode-' + m).classList.add('active');
+  }
+</script>
+</body>
+</html>
