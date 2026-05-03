@@ -299,18 +299,26 @@
 
   .mode-row {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .mode-row button {
-    flex: 1;
-    padding: 10px 8px;
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    padding: 10px 6px;
     font-size: 10px;
+    letter-spacing: 0.18em;
   }
 
   .mode-row button.active {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .mode-row #mode-b.active {
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   /* ============ HOUSE RULES ============ */
@@ -496,6 +504,7 @@
     <button id="mode-mix" class="active" onclick="setMode('mix')">Mix</button>
     <button id="mode-q" onclick="setMode('q')">Questions</button>
     <button id="mode-d" onclick="setMode('d')">Dares</button>
+    <button id="mode-b" onclick="setMode('b')">Bachelor</button>
   </div>
 
   <!-- HOUSE RULES -->
@@ -571,33 +580,112 @@
     "Have you ever pretended to be on the phone to avoid someone?"
   ];
 
+  const bachelorQuestions = [
+    "What's the groom's most-used emoji, and what does it say about him?",
+    "Whose wedding speech would you actually trust to be funny — and whose would you sit through politely?",
+    "What's the worst piece of dating advice the groom has ever given you?",
+    "What song immediately makes everyone in this room think of the groom?",
+    "What's the groom's biggest 'I told you so' moment about his own life?",
+    "Who in this group would the groom call first if he was 30 minutes late to his own wedding?",
+    "What's something the groom does every single time he's drunk?",
+    "What's the most embarrassing thing you've watched the groom go through and somehow survive?",
+    "What's a fashion choice the groom has now fully disowned?",
+    "Who has the groom been friends with the longest in this room? Sip if you guess wrong.",
+    "What's the petty thing the groom is secretly the most competitive about?",
+    "What's the groom's most chaotic 'main character' moment of the last year?",
+    "What's the worst date the groom has ever told you about?",
+    "Who in this room has gotten the groom into the most trouble — and what for?",
+    "What's the most unhinged text the groom has ever sent in the group chat?",
+    "Has the groom ever ghosted someone we know? No names — just confirm.",
+    "What's the longest situationship the groom had before he settled down?",
+    "What's a red flag the groom dated through and somehow survived?",
+    "Who in this room had a crush on someone the groom dated? Confess or sip.",
+    "What's the most expensive bad decision the groom has made on a night out?",
+    "What's a story about the groom the bride probably still doesn't know?",
+    "Who in this group has the groom drunk-called the most?",
+    "What's a wedding tradition the groom is secretly dreading?",
+    "Has anyone here ever fake-fought with the groom to get out of a plan?",
+    "What's the wildest thing the groom has done at someone else's wedding?",
+    "What's the groom's most 'we don't talk about it' hookup story?",
+    "What's something the groom has done at a bar that would not survive the wedding speech?",
+    "Who in this group has kissed someone the groom has also kissed? Sip if it's you.",
+    "What's the most TMI thing you know about the groom that the bride would actually find funny?",
+    "What's the groom's 'if I weren't getting married' celebrity free pass?",
+    "What's the groom's most predictable message in your group chat?",
+    "Whose laugh in this room is contagious for the groom?",
+    "What's a trait the groom has that his future spouse will absolutely have to deal with?",
+    "What's the groom's go-to drink, and what does it say about him?",
+    "What's the groom's signature party-trick dance move?",
+    "Whose advice does the groom pretend to take but never actually follows?",
+    "What's a hobby the groom picked up that didn't last two weeks?",
+    "What's the most unflattering photo the group has of the groom?",
+    "What's the most random place you've ended up with the groom on a night out?",
+    "What's a phrase the groom says that is 100% him?",
+    "What's the groom's go-to drunk food order — and is he actually proud of it?",
+    "Who's the friend the groom pretends to like but secretly side-eyes?",
+    "What's the most chaotic group trip the groom has been on?",
+    "Has the groom ever fallen for a love-bomb? Sip for him if he has.",
+    "What's the worst dating-app opener the groom ever sent? Confess or sip.",
+    "What's a moment the groom socially peaked in his early 20s?",
+    "Who in this room has seen the groom at his absolute lowest? Sip in solidarity.",
+    "What's the most 'main character' decision the groom has ever made?",
+    "What's a friendship breakup the groom still isn't fully over?",
+    "What's a piece of gossip about the groom you swore you'd take to your grave? Tease, don't tell.",
+    "What's the groom's most expensive impulse purchase from this engagement era?",
+    "Who's the friend the groom confesses to first when something dramatic happens?",
+    "What's a song the groom loved at 19 that he'd be horrified to hear now?",
+    "What's a place you've ended up with the groom that you can never tell anyone about?",
+    "What's the most controversial opinion you've heard the groom defend?",
+    "What's the groom's hottest take on his own past dating life?",
+    "Who's the one ex of the groom you all secretly miss as a person, even if they were wrong for him?",
+    "What's a kiss the groom had that he'd give back if he could?",
+    "What's the most scandalous rumor anyone has ever spread about the groom — true or false?",
+    "What's the closest the groom has ever come to being uninvited from somewhere?"
+  ];
+
   const dares = [
-    "Show the group the last 3 photos in your camera roll.",
-    "Read out the last text you sent — no edits, no excuses.",
     "Do your best impression of someone in this room. Group has to guess who.",
     "Speak only in questions until your next turn.",
-    "Let the person to your left post a one-word story to your social media.",
-    "Sing the chorus of the last song you played.",
-    "Show your most-used emoji and explain why.",
+    "Sing the chorus of the last song stuck in your head.",
     "Do a 30-second standup set about someone in this room.",
     "Swap one item of clothing with the person across from you.",
     "Call a contact you haven't spoken to in 6+ months and just say hi.",
-    "Let the group write the next sentence in your notes app.",
     "Do your most embarrassing dance move for 10 seconds.",
-    "Read your most recent search history out loud — last 5 entries.",
     "Speak in a fake accent until someone earns your turn back.",
-    "Show your screen time report. Highest app gets roasted.",
     "Until your next turn, refer to yourself in third person.",
     "Give a 20-second TED talk on a topic the group picks.",
-    "Let the group rename your phone wallpaper for the night.",
     "Compliment everyone in this room — but make each one weirdly specific.",
     "Do an interpretive dance of your day. No words allowed.",
     "Whisper everything you say until the next card.",
-    "Let the group pick your next song to play out loud.",
-    "Do the worm. Or attempt it. Either way you commit.",
-    "Trade phones with someone for the next round.",
-    "Show the last meme you saved.",
-    "Tell a story using only the titles of songs in your library."
+    "Do the worm. Or attempt it. Either way you commit."
+  ];
+
+  const bachelorDares = [
+    "Do your best impression of the groom saying 'I do.' Group votes on accuracy.",
+    "Write a one-line wedding toast for the groom right now. Anything cringe earns you a sip.",
+    "Until your next turn, refer to the groom only as 'the future Mr. [last name].'",
+    "Do a 15-second runway walk as if you were the groom at his bachelor party.",
+    "Pick someone in the room. In character as the groom, tell them why he would have made a great best man for them.",
+    "Let the groom pick anyone in this room. Compliment them like you're trying to set them up.",
+    "Until your next turn, respond to everyone in sportscaster narration ('And here he goes, folks, full sip on the rebound…').",
+    "Trade one clothing item with the person across from you and wear it until your next turn.",
+    "Let the group ask you one yes/no question about your most recent ex. Sip to skip.",
+    "Do an interpretive dance of the groom's love story until the room guesses the right scene.",
+    "Pick someone in the room. For the next 3 rounds, answer every question as if you were them.",
+    "Reenact the moment you found out the groom was getting engaged. The groom decides if you nailed it.",
+    "Give a 20-second toast roasting the groom. Can't make him laugh? 2 sips.",
+    "Tell the room the spiciest thing the groom has told you in confidence. The groom approves what's repeatable — veto = 2 sips.",
+    "Name a person in this room you've had a 'what if' thought about. Or sip twice.",
+    "Pick someone in the room. With a straight face, deliver the most flirtatious compliment you can think of. No laughing or it's 2 sips.",
+    "Whisper a secret to the person on your left that you've never told anyone. (They'll never tell. Probably.)",
+    "Stand up and roast the groom for 30 seconds straight. No prep time.",
+    "Do a celebrity impression — group decides if it lands or you sip.",
+    "Make up a one-line vow for the groom on his behalf. Anything cringe = sip.",
+    "Pick a famous wedding toast and recite as much of it as you can from memory.",
+    "For the next 2 rounds, every sentence you say has to start with 'Bro…'",
+    "Stand on one leg until the next card. Fall = sip.",
+    "Tell the funniest groom story you have in under 30 seconds. Beat the timer or sip.",
+    "Make a fake reservation under the groom's full name for 'two for one cancellation.'"
   ];
 
   let mode = 'mix';
@@ -605,6 +693,8 @@
   let sips = 0;
   let qPool = [];
   let dPool = [];
+  let bqPool = [];
+  let bdPool = [];
 
   function shuffle(arr) {
     const a = [...arr];
@@ -617,6 +707,8 @@
 
   qPool = shuffle(questions);
   dPool = shuffle(dares);
+  bqPool = shuffle(bachelorQuestions);
+  bdPool = shuffle(bachelorDares);
 
   function drawCard() {
     const card = document.getElementById('card');
@@ -624,7 +716,21 @@
 
     setTimeout(() => {
       let type, text, isDare;
-      if (mode === 'q' || (mode === 'mix' && Math.random() < 0.6)) {
+
+      // Bachelor mode: draw a mix of bachelor questions and dares
+      if (mode === 'b') {
+        if (Math.random() < 0.6) {
+          if (bqPool.length === 0) bqPool = shuffle(bachelorQuestions);
+          text = bqPool.pop();
+          type = 'BACHELOR · QUESTION';
+          isDare = false;
+        } else {
+          if (bdPool.length === 0) bdPool = shuffle(bachelorDares);
+          text = bdPool.pop();
+          type = 'BACHELOR · DARE';
+          isDare = true;
+        }
+      } else if (mode === 'q' || (mode === 'mix' && Math.random() < 0.6)) {
         if (qPool.length === 0) qPool = shuffle(questions);
         text = qPool.pop();
         type = 'QUESTION';
